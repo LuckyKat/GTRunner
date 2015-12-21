@@ -79,7 +79,12 @@ MainAppController.prototype.runTask = function (obj, $scope) {
 
     $scope.consoleClosed = false;
 
-    var command = spawn('cd ' + path.dirname(currentProjectObj.path) + ' && gulp ' + obj);
+    var command = spawn('gulp ' + obj, {
+        cwd: path.dirname(currentProjectObj.path),
+        env: {
+            PATH: '~/.bin/:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:/usr/local/bin/gulp' // <- quick fix for error "/bin/sh: gulp: command not found" on OSX
+        }
+    });
 
     command.stdout.on('data', function (data) {
         self.printLineToConsole($scope, data);
@@ -99,7 +104,7 @@ MainAppController.prototype.printLineToConsole = function($scope, data, isError)
         return;
     }
     var classToAdd = isError ? "error" : "";
-    $scope.consoleCode += "<code class='" + classToAdd + "'>" + data.trim() + "</code>";
+    $scope.consoleCode += "<code class='" + classToAdd + "'>" + data.trim() + "</code><br>";
     $scope.$digest();
     this.scrollToConsoleBottom();
 };
